@@ -1,4 +1,4 @@
-ARG Version=1.1.0-wackermann
+ARG Version=1.2.0-wackermann
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 ARG Version

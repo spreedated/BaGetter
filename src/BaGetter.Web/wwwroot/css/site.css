@@ -16,6 +16,13 @@ body {
   font-size: 16px;
   display: flex;
   flex-direction: column;
+  background-color: #222222;
+  color: #aaaaaa;
+}
+
+input
+{
+    background-color: #222222;
 }
 
 main {
@@ -24,12 +31,12 @@ main {
 
 .footer {
   flex-shrink: 0;
-  background-color: #d3d3d3;  
+  background-color: #363636;
 }
 
 .footer p {
-  text-align: center;    
-  vertical-align: middle;    
+  text-align: center;
+  vertical-align: middle;
 }
 
 h1,
@@ -104,25 +111,27 @@ h4 {
 }
 
 .navbar-inverse {
-  background-color: #004880;
-  border-color: #002b4d;
+  background-color: #44a601;
+  border-color: #307600;
 }
 
 .navbar {
   border-radius: 0;
+  font-weight: bold;
 }
 
 .navbar-inverse .navbar-nav > li > a {
   font-weight: 100;
-  color: #e3ebf1;
+  color: #cbe0bd;
 }
 
 .navbar-nav > li > a {
   line-height: 22px;
+  font-weight: bold;
 }
 
 .navbar-inverse .navbar-nav a.active {
-  color: #e3ebf1;
+  color: #cbe0bd;
 }
 
 .navbar-inverse .navbar-nav a.active,
@@ -145,19 +154,23 @@ h4 {
   display: block;
 }
 
-.nav > li > a {
-  position: relative;
-  display: block;
-  padding: 10px 15px;
-}
+  .nav > li > a {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    font-weight: bold;
+  }
 
 .search-container {
   padding-top: 16px;
   padding-bottom: 16px;
 }
 
-.search-container .form-control {
-  border-radius: 0;
+.search-container .form-control
+{
+    background-color: #222222;
+    border-radius: 0;
+    color: #aaaaaa;
 }
 
 .search-container button {
@@ -169,15 +182,16 @@ h4 {
   border-bottom-right-radius: 0;
 }
 
-.search-container button:active,
-.search-container button:active:focus,
-.search-container button:active:hover,
-.search-container button:focus,
-.search-container button:hover {
-  background-color: #a56000;
-  border-color: #814b00;
-  color: #fff;
-}
+  .search-container button:active,
+  .search-container button:active:focus,
+  .search-container button:active:hover,
+  .search-container button:focus,
+  .search-container button:hover {
+    background-color: #a56000;
+    border-color: #814b00;
+    color: #fff;
+    font-weight: bold;
+  }
 
 .link-button {
   background-color: transparent;
@@ -190,12 +204,13 @@ h4 {
   color: #337ab7;
 }
 
-.link-button:hover,
-.link-button:focus {
-  outline: none;
-  text-decoration: underline;
-  color: #23527c;
-}
+  .link-button:hover,
+  .link-button:focus {
+    outline: none;
+    text-decoration: underline;
+    color: #23527c;
+    font-weight: bold;
+  }
 
 /* Index page
 -------------------------------------------------- */
@@ -203,10 +218,10 @@ h4 {
   margin-bottom: 20px;
 }
 
-.search-options span.ms-Checkbox-text {
-  font-weight: bold;
-  font-size: 16px;
-}
+  .search-options span.ms-Checkbox-text {
+    font-weight: bold;
+    font-size: 16px;
+  }
 
 .search-options .form-group {
   margin-right: 10px;
@@ -236,17 +251,17 @@ h4 {
   margin-right: 5px;
 }
 
-.search-result .info {
-  padding-left: 0;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  margin-left: -5px;
-  line-height: 22px;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .search-result .info {
+    padding-left: 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-left: -5px;
+    line-height: 22px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
 .search-result .info span:not(:first-child) {
   padding-left: 10px;
@@ -453,11 +468,11 @@ h4 {
 }
 
 .display-package .package-used-by thead tr {
-  border-bottom: 2px solid #d3d3d3;
+  border-bottom: 2px solid #363636;
 }
 
 .display-package .package-used-by tbody tr {
-  border-bottom: 1px solid #d3d3d3;
+  border-bottom: 1px solid #363636;
 }
 
 .display-package .package-used-by td div {
