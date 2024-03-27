@@ -30,4 +30,8 @@
     <ProjectReference Include="..\BaGetter.Protocol\BaGetter.Protocol.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <DockerfileRunArguments>-p 5300:8080</DockerfileRunArguments>
+  </PropertyGroup>
+
 </Project>
