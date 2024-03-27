@@ -172,16 +172,27 @@ If not specified, the `MaxRequestBodySize` in BaGetter defaults to 250MB (262144
 
 ## Health Endpoint
 
-When running within a containerized environment like Kubernetes, a basic health endpoint is exposed at `/health` that returns 200 OK and the text "Healthy" when running.
+A health endpoint is exposed at `/health` that returns 200 OK or 503 Service Unavailable and always includes a json object listing the current status of the application:
 
-This path is configurable if needed:
+```json
+{
+  "Status": "Healthy",
+  "Sqlite": "Healthy",
+  ...
+}
+```
+
+The services can be omitted by setting the `Statistics:ListConfiguredServices` to false, in which case only the `Status` property is returned in the json object.
+
+This path and the name of the "Status" property are configurable if needed:
 
 ```json
 {
     ...
 
     "HealthCheck": {
-        "Path": "/healthz"
+        "Path": "/healthz",
+        "StatusPropertyName": "Status"
     },
 
     ...
@@ -205,15 +216,16 @@ This can be useful if you are hosting a private feed and need to host large pack
 
 ## Statistics
 
-On the application's statistics page the currently used services are listed.
-You can hide or show this part by modifying the `EnableStatisticsPage` configuration:
+On the application's statistics page the currently used services and overall package and version counts are listed.
+You can hide or show this page by modifying the `EnableStatisticsPage` configuration.  
+If you set `ListConfiguredServices` to `false` the currently used services for database and storage (such as `Sqlite`) are omitted on the stats page:
 
 ```json
 {
     ...
 
     "Statistics": {
-        "EnableStatisticsPage": false,
+        "EnableStatisticsPage": true,
         "ListConfiguredServices": false
     },
 
@@ -221,7 +233,6 @@ You can hide or show this part by modifying the `EnableStatisticsPage` configura
 }
 ```
 
-If you set `ListConfiguredServices` to `true` the currently used services for database and storage are shown on the stats page.
 
 
 ## Load secrets from files
