@@ -1,4 +1,4 @@
-ARG Version=1.0.0
+ARG Version=1.1.1
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 ARG Version
