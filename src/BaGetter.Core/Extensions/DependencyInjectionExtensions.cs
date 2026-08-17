@@ -15,7 +15,7 @@ namespace BaGetter.Core;
 
 public static partial class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddBaGetterApplication(
+    public static BaGetterApplication AddBaGetterApplication(
         this IServiceCollection services,
         Action<BaGetterApplication> configureAction)
     {
@@ -29,7 +29,7 @@ public static partial class DependencyInjectionExtensions
 
         services.AddFallbackServices();
 
-        return services;
+        return app;
     }
 
     /// <summary>
@@ -68,6 +68,7 @@ public static partial class DependencyInjectionExtensions
         services.AddBaGetterOptions<DatabaseOptions>(nameof(BaGetterOptions.Database));
         services.AddBaGetterOptions<FileSystemStorageOptions>(nameof(BaGetterOptions.Storage));
         services.AddBaGetterOptions<MirrorOptions>(nameof(BaGetterOptions.Mirror));
+        services.AddBaGetterOptions<RetentionOptions>(nameof(BaGetterOptions.Retention));
         services.AddBaGetterOptions<SearchOptions>(nameof(BaGetterOptions.Search));
         services.AddBaGetterOptions<StorageOptions>(nameof(BaGetterOptions.Storage));
         services.AddBaGetterOptions<StatisticsOptions>(nameof(BaGetterOptions.Statistics));

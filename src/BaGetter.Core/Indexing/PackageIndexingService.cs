@@ -15,6 +15,7 @@ public class PackageIndexingService : IPackageIndexingService
     private readonly ISearchIndexer _search;
     private readonly SystemTime _time;
     private readonly IOptionsSnapshot<BaGetterOptions> _options;
+    private readonly IOptionsSnapshot<RetentionOptions> _retentionOptions;
     private readonly ILogger<PackageIndexingService> _logger;
     private readonly IPackageDeletionService _packageDeletionService;
 
@@ -25,6 +26,7 @@ public class PackageIndexingService : IPackageIndexingService
         ISearchIndexer search,
         SystemTime time,
         IOptionsSnapshot<BaGetterOptions> options,
+        IOptionsSnapshot<RetentionOptions> retentionOptions,
         ILogger<PackageIndexingService> logger)
     {
         _packages = packages ?? throw new ArgumentNullException(nameof(packages));
@@ -32,11 +34,23 @@ public class PackageIndexingService : IPackageIndexingService
         _search = search ?? throw new ArgumentNullException(nameof(search));
         _time = time ?? throw new ArgumentNullException(nameof(time));
         _options = options ?? throw new ArgumentNullException(nameof(options));
+        _retentionOptions = retentionOptions ?? throw new ArgumentNullException(nameof(retentionOptions));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _packageDeletionService = packageDeletionService ?? throw new ArgumentNullException(nameof(packageDeletionService));
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (_options.Value.MaxVersionsPerPackage > 0)
+        {
+            _logger.LogError("MaxVersionsPerPackage is deprecated and is not used. Please use MaxMajorVersions, MaxMinorVersions, MaxPatchVersions, and MaxPrereleaseVersions instead.");
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
-    public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, CancellationToken cancellationToken)
+    public Task<PackageIndexingResult> IndexAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        return IndexAsync(stream, null, cancellationToken);
+    }
+
+    public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, string cacheFeedUrl = null, CancellationToken cancellationToken = default)
     {
         // Try to extract all the necessary information from the package.
         Package package;
@@ -48,6 +62,7 @@ public class PackageIndexingService : IPackageIndexingService
         {
             using var packageReader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
             package = packageReader.GetPackageMetadata();
+            package.CachedFrom = cacheFeedUrl;
             package.Published = _time.UtcNow;
 
             nuspecStream = await packageReader.GetNuspecAsync(cancellationToken);
@@ -156,14 +171,22 @@ public class PackageIndexingService : IPackageIndexingService
 
         await _search.IndexAsync(package, cancellationToken);
 
-        if (_options.Value.MaxVersionsPerPackage.HasValue)
+        if (_retentionOptions.Value.MaxMajorVersions.HasValue)
         {
-            try { 
+            try
+            {
                 _logger.LogInformation(
                     "Deleting older packages for package {PackageId} {PackageVersion}",
                     package.Id,
                     package.NormalizedVersionString);
-                var deleted = await _packageDeletionService.DeleteOldVersionsAsync(package, _options.Value.MaxVersionsPerPackage.Value, cancellationToken);
+
+                var deleted = await _packageDeletionService.DeleteOldVersionsAsync(
+                    package,
+                    _retentionOptions.Value.MaxMajorVersions,
+                    _retentionOptions.Value.MaxMinorVersions,
+                    _retentionOptions.Value.MaxPatchVersions,
+                    _retentionOptions.Value.MaxPrereleaseVersions,
+                    cancellationToken);
                 if (deleted > 0)
                 {
                     _logger.LogInformation(

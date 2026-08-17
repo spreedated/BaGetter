@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NuGet.Versioning;
 
 namespace BaGetter.Core;
 
 // See NuGetGallery's: https://github.com/NuGet/NuGetGallery/blob/master/src/NuGetGallery.Core/Entities/Package.cs
+[DebuggerDisplay("{Id} {Version}")]
 public class Package
 {
     public int Key { get; set; }
@@ -34,6 +36,7 @@ public class Package
     public bool HasReadme { get; set; }
     public bool HasEmbeddedIcon { get; set; }
     public bool IsPrerelease { get; set; }
+    public string CachedFrom { get; set; }
     public string ReleaseNotes { get; set; }
     public string Language { get; set; }
     public bool Listed { get; set; }

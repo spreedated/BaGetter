@@ -17,6 +17,27 @@ To do so, you can insert the desired API key in the `ApiKey` field.
 }
 ```
 
+You can also use the `ApiKeys` array in order to manage multiple API keys for multiple teams/developers.
+
+```json
+{
+    "Authentication": {
+        "ApiKeys": [
+            {
+                "Key" : "NUGET-SERVER-API-KEY-1"
+            },
+            {
+                "Key" : "NUGET-SERVER-API-KEY-2"
+            }
+        ]
+        ...
+    }
+    ...
+}
+```
+
+Both `ApiKey` and `ApiKeys` work in conjunction additively eg.: `or` `||` logical operator.
+
 Users will now have to provide the API key to push packages:
 
 ```shell
@@ -154,16 +175,27 @@ downloaded if you know the package's id and version. You can override this behav
 }
 ```
 
-## Enable package auto-deletion
+## Package auto-deletion
 
-If your build server generates many nuget packages, your BaGet server can quickly run out of space. To avoid this issue, `MaxVersionsPerPackage` can be configured to auto-delete packages older packages when a new one is uploaded. This will use the `HardDelete` option detailed above and will unlist and delete the files for the older packages. By default this value is not configured and no packages will be deleted automatically.
+If your build server generates many nuget packages, your BaGetter server can quickly run out of space. Bagetter leverages [SemVer 2](https://semver.org/) and has logic to keep a history of packages based on the version numbering such as `<major>.<minor>.<patch>-<prerelease tag>.<prerelease build number>`.
+
+There is an optional config section for `Retention` and the following parameters can be enabled to limit history for each level of the version. If none of these are set, there are no cleaning rules enforced. Each parameter is optional, e.g. if you specify only a `MaxPatchVersions`, the package limit will only enforced within each major and minor version combination.
+Packages deleted are always the oldest based on version numbers.
+
+- MaxMajorVersions: Maximum number of major versions for each package
+- MaxMinorVersions: Maximum number of minor versions for each major version
+- MaxPatchVersions: Maximum number of patch versions for each major + minor version
+- MaxPrereleaseVersions: Maximum number of prerelease builds for each major + minor + patch version and prerelease type. If you have `beta` and `alpha` this will keep `MaxPrereleaseVersions` versions for both `beta` and `alpha`. Suffixes incompatible with [SemVer 2](https://semver.org/) will be treated as a separate type.
 
 ```json
 {
     ...
-
-    "MaxVersionsPerPackage ": 5,
-
+    "Retention": {
+        "MaxMajorVersions": 5,
+        "MaxMinorVersions": 5,
+        "MaxPatchVersions": 5,
+        "MaxPrereleaseVersions": 5,
+    }
     ...
 }
 ```
@@ -200,11 +232,54 @@ Pushing a package with a pre-release version like "3.1.0-SNAPSHOT" will overwrit
 
 A private feed requires users to authenticate before accessing packages.
 
-:::warning
+You can require that users provide a username and password to access the nuget feed.
+To do so, you can insert the credentials in the `Authentication` section.
 
-Private feeds are not supported at this time! See [this pull request](https://github.com/loic-sharma/BaGet/pull/69) for more information.
+```json
+{
+    "Authentication": {
+        "Credentials": [
+            {
+                "Username": "username",
+                "Password": "password"
+            }
+        ]
+        ...
+    }
+    ...
+}
+```
 
-:::
+Users will now have to provide the username and password to fetch and download packages.
+
+How to add private nuget feed:
+
+1. Download the latest NuGet executable.
+2. Open a Command Prompt and change the path to the nuget.exe location.
+3. The command from the example below stores a token in the %AppData%\NuGet\NuGet.config file. Your original credentials cannot be obtained from this token.
+
+
+```shell
+NuGet Sources Add -Name "localhost" -Source "http://localhost:5000/v3/index.json" -UserName "username" -Password "password"
+```
+
+If you are unable to connect to the feed by using encrypted credentials, store your credentials in clear text:
+
+```shell
+NuGet Sources Add -Name "localhost" -Source "http://localhost:5000/v3/index.json" -UserName "username" -Password "password" -StorePasswordInClearText
+```
+
+If you have already stored a token instead of storing the credentials as clear text, update the definition in the %AppData%\NuGet\NuGet.config file by using the following command:
+
+```shell
+NuGet Sources Update -Name "localhost" -Source "http://localhost:5000/v3/index.json" -UserName "username" -Password "password" -StorePasswordInClearText
+```
+
+The commands are slightly different when using the Package Manager console in Visual Studio:
+
+```shell
+dotnet nuget add source "http://localhost:5000/v3/index.json" --name "bagetter" --username "username" --password "password"
+```
 
 ## Database configuration
 
@@ -219,6 +294,12 @@ BaGetter supports multiple database engines for storing package information:
 Each database engine requires a connection string to configure the connection. Please refer to [ConnectionStrings.com](https://www.connectionstrings.com/) to learn how to create the proper connection string for each database engine.
 
 You may configure the chosen database engine either using environment variables or by editing the `appsettings.json` file.
+
+:::info
+
+Database migrations are automatically applied on application startup.
+
+:::
 
 ### Environment Variables
 
@@ -318,7 +399,7 @@ This can be useful if you are hosting a private feed and need to host large pack
 ## Statistics
 
 On the application's statistics page the currently used services and overall package and version counts are listed.
-You can hide or show this page by modifying the `EnableStatisticsPage` configuration.  
+You can hide or show this page by modifying the `EnableStatisticsPage` configuration.
 If you set `ListConfiguredServices` to `false` the currently used services for database and storage (such as `Sqlite`) are omitted on the stats page:
 
 ```json

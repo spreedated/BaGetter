@@ -21,6 +21,7 @@ For a full list of configurations, please refer to [BaGetter's configuration](..
 :::info
 
 The `bagetter.env` file stores [BaGetter's configuration](../configuration) as environment variables.
+Alternatively, the configuration can be injected via environment variables directly, e.g. the `environment` array in a docker compose file or the `--env` flag in a `docker run` command.
 To learn how these configurations work, please refer to [ASP.NET Core's configuration documentation](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1&tabs=basicconfiguration#configuration-by-environment).
 
 :::
@@ -93,3 +94,33 @@ You can load symbols by using the following symbol location:
 `http://localhost:5000/api/download/symbols`
 
 For Visual Studio, please refer to the [Configure Debugging](https://docs.microsoft.com/en-us/visualstudio/debugger/specify-symbol-dot-pdb-and-source-files-in-the-visual-studio-debugger?view=vs-2017#configure-symbol-locations-and-loading-options) guide.
+
+## Running BaGetter behind a reverse proxy
+
+BaGetter can be run behind a reverse proxy in order to provide HTTPS, your own domain, and other features. For the API to deliver proper URLs, the proxy needs to forward the `X-Forwarded-Host` header, or the `Host` header iteslf.  
+For more information, please refer to the [ASP.NET Core documentation](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer).
+
+Consider binding port 5000 to localhost only using -p 127.0.0.1:5000:8080 to avoid any transmission of non encrypted data even over internal networks
+
+### Apache 2 Configuration
+```config
+<IfModule mod_ssl.c>
+	<VirtualHost *:443>
+
+		ServerName nuget.example.com
+
+		ProxyRequests Off
+		ProxyPreserveHost On
+		ProxyPass / http://localhost:5000/
+		ProxyPassReverse / http://localhost:5000/
+		RequestHeader set X-Forwarded-Proto https
+
+		SSLCertificateFile /etc/letsencrypt/live/nuget.example.com/fullchain.pem #managed by cerbot
+		SSLCertificateKeyFile /etc/letsencrypt/live/nuget.example.com/privkey.pem #managed by cerbot
+		Include /etc/letsencrypt/options-ssl-apache.conf
+		Header always set Strict-Transport-Security "max-age=31536000"
+		Header always set Content-Security-Policy upgrade-insecure-requests
+	</VirtualHost>
+</IfModule>
+```
+

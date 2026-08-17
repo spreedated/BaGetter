@@ -59,7 +59,7 @@ jobs:
           echo ${{ github.sha }} > artifacts/ReleaseSha.txt
           7z a -tzip bagetter-${{ needs.version.outputs.RELEASE_VERSION }}.zip ./artifacts/*
       - name: Generate changelog with git-cliff
-        uses: tj-actions/git-cliff@v1.4.2
+        uses: tj-actions/git-cliff@v2.2.0
         with:
           args: --latest --strip all
           output: "CHANGELOG.md"
@@ -132,7 +132,8 @@ jobs:
     env:
       CHART_DIR: deployment templates/chart
       CHART_REPO: bagetter/helm-chart-repo
-      CHART_REPO_BRANCH: master
+      CHART_REPO_BRANCH: gh-pages
+      CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     steps:
       - uses: actions/checkout@v4.1.1
       - name: Update version in helm chart
@@ -176,7 +177,7 @@ jobs:
           echo '${{ steps.charts.outputs.charts }}' \
           | yq --indent 0 --no-colors --input-format json --unwrapScalar '.[]' \
           | while read -r dir; do
-              helm dependency update $dir;
+              helm dependency update "$dir";
               if [ -f "$dir/Chart.lock" ]; then
                 yq --indent 0 \
                   '.dependencies | map(["helm", "repo", "add", .name, .repository] | join(" ")) | .[]' \
