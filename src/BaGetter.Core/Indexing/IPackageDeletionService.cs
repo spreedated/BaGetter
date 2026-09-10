@@ -10,7 +10,7 @@ public interface IPackageDeletionService
     /// This method deletes old versions of a package.
     /// This leverages semver 2.0 - and assume a package is major.minor.patch-prerelease.build
     /// It can leverage the <see cref="IPackageDatabase"/> to list all versions of a package and then delete all but the last <paramref name="maxMajor"/> versions.
-    /// It also takes into account the <paramref name="maxMinor"/>, <paramref name="maxPath"/> and <paramref name="maxPrerelease"/> parameters to further filter the versions to delete.
+    /// It also takes into account the <paramref name="maxMinor"/>, <paramref name="maxPrerelease"/> parameters to further filter the versions to delete.
     /// </summary>
     /// <param name="package">Package name</param>
     /// <param name="maxMajor">Maximum of major versions to keep (optional)</param>
@@ -19,7 +19,7 @@ public interface IPackageDeletionService
     /// <param name="maxPrerelease">Maximum of pre-release versions (optional)</param>
     /// <param name="cancellationToken">Cancel the operation</param>
     /// <returns>Number of packages deleted</returns>
-    Task<int> DeleteOldVersionsAsync(Package package, uint? maxMajor, uint? maxMinor, uint? maxPatch, uint? maxPrerelease, CancellationToken cancellationToken);
+    public Task<int> DeleteOldVersionsAsync(Package package, uint? maxMajor, uint? maxMinor, uint? maxPatch, uint? maxPrerelease, CancellationToken cancellationToken);
 
     /// <summary>
     /// Attempt to delete a package.
@@ -28,5 +28,5 @@ public interface IPackageDeletionService
     /// <param name="version">The version of the package to delete.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>False if the package does not exist.</returns>
-    Task<bool> TryDeletePackageAsync(string id, NuGetVersion version, CancellationToken cancellationToken);
+    public Task<bool> TryDeletePackageAsync(string id, NuGetVersion version, CancellationToken cancellationToken);
 }
